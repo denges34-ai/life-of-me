@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* Thème : doux, coloré, arrondi. Les couleurs des bureaux viennent du registre. */
+@theme {
+  --font-sans: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-brand-100: #ece9ff;
+  --color-brand-300: #b3a8fa;
+  --color-brand-500: #6d5ae6;
+  --color-brand-600: #5b47d6;
+  --color-cream: #faf7f2;
+  --color-ink: #2b2540;
+  --color-muted: #7a748c;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Marges de sécurité (encoche, barre d'accueil) quand l'appli est en plein écran. */
+.safe-top {
+  padding-top: max(1.25rem, env(safe-area-inset-top));
+}
+.safe-bottom {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+/* Animation d'entrée : uniquement un léger glissement, jamais d'opacité,
+   pour que le contenu reste lisible même si l'animation est ralentie. */
+@keyframes pop-in {
+  from {
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in {
+    animation: none;
+  }
+}
