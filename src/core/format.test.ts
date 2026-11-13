@@ -23,7 +23,8 @@ describe('toISODate', () => {
 describe('formatMoney', () => {
   it('convertit les centimes en montant lisible', () => {
     const text = normalize(formatMoney(123450, 'CHF'))
-    expect(text).toContain('1 234.50')
+    // Le séparateur de milliers dépend de l'appareil : « 1 234.50 » ou « 1'234.50 ».
+    expect(text).toMatch(/1.234\.50/)
     expect(text).toContain('CHF')
   })
 
