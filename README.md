@@ -74,6 +74,20 @@ Ne jamais changer une version existante dans `src/core/db/db.ts` : ajouter un bl
 Chaque entité contient `id`, `createdAt`, `updatedAt`, `deletedAt`, `owner`, `visibility`
 (voir `src/core/db/entity.ts`). Les montants sont stockés en centimes entiers.
 
+### Ajouter une dépendance
+
+Les anciennes versions de npm (dont la 11.6) écrivent un `package-lock.json` incomplet,
+ce qui fait échouer `npm ci` au déploiement. Après un `npm install <paquet>`, régénérer
+le fichier avec un npm récent, puis vérifier :
+
+```bash
+npx -y npm@11.21.2 install --package-lock-only
+```
+
+```bash
+npm ci --dry-run
+```
+
 ### Régénérer les icônes
 
 Après avoir modifié `public/logo.svg` :
