@@ -6,5 +6,6 @@ export const organisationOffice: OfficeModule = {
   icon: '🗓️',
   color: '#e67700',
   tagline: 'Agenda, habitudes et courses',
+  decor: 'calendar',
   phase: 2,
 }

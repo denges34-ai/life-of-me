@@ -6,5 +6,6 @@ export const sportOffice: OfficeModule = {
   icon: '🏋️',
   color: '#e8590c',
   tagline: 'Séances, poids et sommeil',
+  decor: 'dumbbell',
   phase: 2,
 }

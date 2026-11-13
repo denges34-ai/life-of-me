@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from './db/db'
+import { db, SETTINGS_ID } from './db/db'
 import { newEntity } from './db/entity'
 import type { AppSettings, CurrencyCode, OfficeConfig, Profile } from './db/types'
 
-export const SETTINGS_ID = 'app'
+export { SETTINGS_ID }
 export const DEFAULT_COMPANY_NAME = 'Life of Me'
 
 /** Ce que l'onboarding récolte. */
@@ -70,6 +70,11 @@ export async function completeOnboarding(draft: OnboardingDraft, allOfficeIds: s
   })
   // Demande au navigateur de ne pas effacer les données locales s'il manque de place.
   void navigator.storage?.persist?.().catch(() => false)
+}
+
+/** Modifie les réglages de l'appli. */
+export async function updateSettings(changes: Partial<Pick<AppSettings, 'companyName' | 'currency' | 'sceneMode'>>): Promise<void> {
+  await db.settings.update(SETTINGS_ID, { ...changes, updatedAt: new Date().toISOString() })
 }
 
 /** Efface toutes les données locales : l'appli repart de l'onboarding. */

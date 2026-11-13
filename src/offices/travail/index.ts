@@ -6,5 +6,6 @@ export const travailOffice: OfficeModule = {
   icon: '💼',
   color: '#4263eb',
   tagline: 'Tâches, horaires et carrière',
+  decor: 'briefcase',
   phase: 2,
 }

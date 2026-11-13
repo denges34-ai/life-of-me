@@ -16,6 +16,9 @@ export interface BaseEntity {
   visibility: Visibility
 }
 
+/** Dans les données, « me » désigne le PDG (participant d'un voyage, payeur d'une dépense). */
+export const ME = 'me'
+
 export type CurrencyCode = 'CHF' | 'EUR' | 'USD' | 'GBP' | 'CAD'
 
 /** Une personne de l'entreprise : le PDG, puis l'associée en phase 3. */

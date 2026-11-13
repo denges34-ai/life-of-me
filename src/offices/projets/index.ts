@@ -6,5 +6,6 @@ export const projetsOffice: OfficeModule = {
   icon: '🎯',
   color: '#7048e8',
   tagline: 'Grands objectifs et vision board',
+  decor: 'target',
   phase: 2,
 }

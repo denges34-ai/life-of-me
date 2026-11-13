@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { resetApp, useCeoProfile, useSettings } from '../../core/company'
+import { resetApp, updateSettings, useCeoProfile, useSettings } from '../../core/company'
 import { CURRENCIES, formatDate } from '../../core/format'
 import { Button } from '../../shared/ui/Button'
+import { InstallHint } from '../../shared/ui/InstallHint'
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -12,7 +13,7 @@ function Row({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Réglages (version minimale de la phase 0). */
+/** Réglages de l'appli. */
 export function Settings() {
   const settings = useSettings()
   const profile = useCeoProfile()
@@ -38,6 +39,8 @@ export function Settings() {
         <h1 className="text-2xl font-extrabold">Réglages</h1>
       </header>
 
+      <InstallHint />
+
       <section className="divide-y divide-black/5 rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
         <Row label="Entreprise" value={settings?.companyName ?? ''} />
         <Row label="PDG" value={profile?.firstName ?? ''} />
@@ -45,9 +48,31 @@ export function Settings() {
         <Row label="Fondée le" value={settings ? formatDate(settings.createdAt) : ''} />
       </section>
 
-      <p className="px-1 text-sm text-muted">
-        🔒 Tes données restent sur cet appareil. Rien n'est envoyé ailleurs.
-      </p>
+      <section>
+        <h2 className="mb-2 px-1 text-sm font-bold uppercase tracking-wide text-muted">Affichage de l'accueil</h2>
+        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-black/5 p-1" role="radiogroup" aria-label="Affichage de l'accueil">
+          {(
+            [
+              { mode: '3d', label: '🏢 Open space 3D' },
+              { mode: '2d', label: '🗂️ Liste simple' },
+            ] as const
+          ).map((option) => (
+            <button
+              key={option.mode}
+              type="button"
+              role="radio"
+              aria-checked={settings?.sceneMode === option.mode}
+              onClick={() => void updateSettings({ sceneMode: option.mode })}
+              className={`min-h-12 rounded-xl text-sm font-bold transition ${settings?.sceneMode === option.mode ? 'bg-white shadow-sm' : 'text-muted'}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 px-1 text-xs text-muted">La liste simple économise la batterie et convient aux téléphones plus anciens.</p>
+      </section>
+
+      <p className="px-1 text-sm text-muted">🔒 Tes données restent sur cet appareil. Rien n'est envoyé ailleurs.</p>
 
       <div className="mt-auto flex flex-col gap-3">
         <Button variant="danger" onClick={() => void handleReset()}>

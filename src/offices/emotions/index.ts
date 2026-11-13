@@ -6,5 +6,6 @@ export const emotionsOffice: OfficeModule = {
   icon: '💭',
   color: '#d6336c',
   tagline: 'Humeur, journal et gratitude',
+  decor: 'plant',
   phase: 2,
 }

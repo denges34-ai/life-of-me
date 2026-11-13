@@ -50,8 +50,22 @@ body {
   animation: pop-in 0.25s ease-out both;
 }
 
+/* Feuille de saisie qui monte du bas. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(40px);
+  }
+  to {
+    transform: none;
+  }
+}
+.sheet-in {
+  animation: sheet-in 0.2s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pop-in {
+  .pop-in,
+  .sheet-in {
     animation: none;
   }
 }
