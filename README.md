@@ -3,8 +3,8 @@
 Ma vie, gérée comme une mini-entreprise : une PWA installable sur iPhone et Android,
 qui fonctionne hors ligne et garde toutes les données sur l'appareil.
 
-**État : phase 0** — projet, PWA installable, onboarding. L'open space 3D et les
-bureaux Finances et Voyages arrivent en phase 1.
+**État : phase 1** — open space 3D, Salle du PDG, bureaux Finances et Voyages.
+Les cinq autres bureaux arrivent en phase 2.
 
 ## Lancer le projet
 
@@ -54,17 +54,23 @@ Réglage à faire une seule fois sur GitHub : **Settings → Pages → Source : 
 
 ```
 src/
-  app/       routing, écrans transverses (onboarding, accueil, réglages)
-  scene/     open space 3D (phase 1)
+  app/       routing, écrans transverses (onboarding, accueil, Salle du PDG, réglages)
+  scene/     open space 3D (bureaux, avatar, caméra, jour/nuit, étiquettes)
   offices/   un dossier par bureau + registry.ts
-  core/      base de données, formats, installation PWA
-  shared/    composants d'interface réutilisables
+  core/      base de données, dates, formats, événements, installation PWA
+  shared/    composants d'interface réutilisables (gabarit de bureau, feuille, champs)
 ```
 
 ### Ajouter un bureau
 
 1. Créer `src/offices/<id>/index.ts` qui exporte un `OfficeModule`.
 2. L'ajouter à la liste dans `src/offices/registry.ts`.
+
+Un bureau complet suit le modèle de `finances/` : `types.ts` (données et tables),
+`logic.ts` (calculs purs, testés), `db.ts` (lectures et écritures), `summary.ts`
+(badge, état et chiffres clés pour l'open space et la Salle du PDG), `Screen.tsx`.
+L'open space, la Salle du PDG et le routage ne lisent que le contrat `OfficeModule`
+(`src/core/offices/types.ts`).
 
 ### Modifier la base de données
 

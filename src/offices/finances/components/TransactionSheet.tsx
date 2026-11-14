@@ -41,6 +41,8 @@ export function TransactionSheet({ data, currency, transaction, color, onClose }
   const [accountId, setAccountId] = useState<string | null>(transaction ? transaction.accountId : defaultAccount)
   const [date, setDate] = useState(transaction?.date ?? toISODate())
   const [note, setNote] = useState(transaction?.note ?? '')
+  // Verrou : un double tap sur « Enregistrer » ne doit pas créer deux mouvements.
+  const [saving, setSaving] = useState(false)
 
   const amountCents = parseMoney(amount)
   const valid = amountCents !== null && amountCents > 0
@@ -53,7 +55,8 @@ export function TransactionSheet({ data, currency, transaction, color, onClose }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!valid) return
+    if (!valid || saving) return
+    setSaving(true)
     const input = { type, amountCents, categoryId, accountId, date, note: note.trim() }
     if (transaction) await updateTransaction(transaction.id, input)
     else await addTransaction(input)
@@ -116,7 +119,7 @@ export function TransactionSheet({ data, currency, transaction, color, onClose }
               Supprimer
             </Button>
           )}
-          <Button type="submit" className="flex-1" disabled={!valid} style={{ backgroundColor: color }}>
+          <Button type="submit" className="flex-1" disabled={!valid || saving} style={{ backgroundColor: color }}>
             Enregistrer
           </Button>
         </div>

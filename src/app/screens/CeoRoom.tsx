@@ -72,7 +72,7 @@ export function CeoRoom() {
       <Card>
         <p className="text-xs font-bold uppercase tracking-wide text-muted">☕ Réunion du matin</p>
         <h2 className="mt-1 text-xl font-extrabold">Bonjour {profile?.firstName}</h2>
-        <p className="text-sm capitalize text-muted">{formatDayLong(toISODate())}</p>
+        <p className="text-sm text-muted first-letter:uppercase">{formatDayLong(toISODate())}</p>
         {open.length === 0 ? (
           <p className="mt-3 text-sm text-muted">Aucun bureau ouvert pour l'instant. Active Finances ou Voyages dans les réglages.</p>
         ) : (

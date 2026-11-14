@@ -1,12 +1,13 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useRef, useState, type ComponentRef, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, useState, type ComponentRef, type RefObject } from 'react'
 import { Vector3, type Group, type OrthographicCamera } from 'three'
 import type { OfficeModule } from '../core/offices/types'
 import { useOfficeSummary } from '../core/offices/useOfficeSummary'
 import { getDayPhase, type DayPhase } from './dayPhase'
 import { Plant } from './Decor'
 import { Desk } from './Desk'
+import { DeskLabel, OfficeLabel, type LabelRegistry } from './Labels'
 import { deskSlots, floorSize, type Slot } from './layout'
 
 export interface OpenSpaceOffice {
@@ -42,33 +43,16 @@ function useDayPhase(): DayPhase {
 }
 
 /** Bureau relié au résumé « vivant » de son module (badge, état, compte à rebours). */
-function OfficeDesk({
-  entry,
-  slot,
-  lampsOn,
-  showName,
-  onSelect,
-}: {
-  entry: OpenSpaceOffice
-  slot: Slot
-  lampsOn: boolean
-  showName: boolean
-  onSelect: () => void
-}) {
+function OfficeDesk({ entry, slot, lampsOn, onSelect }: { entry: OpenSpaceOffice; slot: Slot; lampsOn: boolean; onSelect: () => void }) {
   const summary = useOfficeSummary(entry.office)
   return (
     <Desk
       position={[slot[0], 0, slot[1]]}
-      name={entry.name}
-      icon={entry.office.icon}
       color={entry.office.color}
       decor={entry.office.decor}
       state={summary.state}
-      badge={summary.badge}
-      deskLabel={summary.deskLabel}
       underConstruction={!entry.office.Screen}
       lampsOn={lampsOn}
-      showName={showName}
       onSelect={onSelect}
     />
   )
@@ -102,14 +86,22 @@ interface Focus {
   opened: boolean
 }
 
-function Scene({ offices, onOpen }: OpenSpaceProps) {
+interface SceneProps extends OpenSpaceProps {
+  /** Étiquettes HTML posées par-dessus la scène : la scène les déplace à chaque image. */
+  labels: RefObject<LabelRegistry>
+  showNames: boolean
+  onShowNamesChange: (show: boolean) => void
+}
+
+/** Vecteur de travail réutilisé à chaque image (évite de créer des objets en continu). */
+const projected = new Vector3()
+
+function Scene({ offices, onOpen, labels, showNames, onShowNamesChange }: SceneProps) {
   const phase = useDayPhase()
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null)
   const avatar = useRef<Group>(null)
   const avatarTarget = useRef(new Vector3(lastAvatarPosition[0], 0, lastAvatarPosition[1]))
   const focus = useRef<Focus | null>(null)
-  // Les noms des bureaux n'apparaissent qu'une fois zoomé : sinon ils se chevauchent sur un petit écran.
-  const [showNames, setShowNames] = useState(false)
   const camera = useThree((state) => state.camera) as OrthographicCamera
   const size = useThree((state) => state.size)
   const clock = useThree((state) => state.clock)
@@ -134,7 +126,7 @@ function Scene({ offices, onOpen }: OpenSpaceProps) {
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1)
     const zoomedIn = camera.zoom > baseZoom * 1.3
-    if (zoomedIn !== showNames) setShowNames(zoomedIn)
+    if (zoomedIn !== showNames) onShowNamesChange(zoomedIn)
     const body = avatar.current
     let distance = 0
 
@@ -174,6 +166,21 @@ function Scene({ offices, onOpen }: OpenSpaceProps) {
         onOpen(current.id)
       }
     }
+  })
+
+  // Chaque étiquette suit son bureau : on projette son point d'ancrage 3D sur l'écran.
+  useFrame(() => {
+    const place = (id: string, x: number, y: number, z: number) => {
+      const element = labels.current.get(id)
+      if (!element) return
+      projected.set(x, y, z).project(camera)
+      const left = (projected.x * 0.5 + 0.5) * size.width
+      const top = (-projected.y * 0.5 + 0.5) * size.height
+      element.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0) translate(-50%, -50%)`
+      element.style.opacity = '1'
+    }
+    place('pdg', 0, 2.6, 0)
+    offices.forEach((entry, index) => place(entry.office.id, slots[index][0], 2.15, slots[index][1]))
   })
 
   const half = floor / 2
@@ -225,15 +232,10 @@ function Scene({ offices, onOpen }: OpenSpaceProps) {
       {/* Bureau du PDG, au centre */}
       <Desk
         position={[0, 0, 0]}
-        name="Salle du PDG"
-        icon="👔"
         color="#f2b632"
         state="ok"
-        badge={null}
-        deskLabel={null}
         ceo
         lampsOn={phase.lampsOn}
-        showName={showNames}
         onSelect={() => select('pdg', 0, 0)}
       />
 
@@ -243,7 +245,6 @@ function Scene({ offices, onOpen }: OpenSpaceProps) {
           entry={entry}
           slot={slots[index]}
           lampsOn={phase.lampsOn}
-          showName={showNames}
           onSelect={() => select(entry.office.id, slots[index][0], slots[index][1])}
         />
       ))}
@@ -272,17 +273,35 @@ function Scene({ offices, onOpen }: OpenSpaceProps) {
 
 /** L'open space 3D : écran principal de l'appli. */
 export default function OpenSpace(props: OpenSpaceProps) {
+  const labels = useRef<LabelRegistry>(new Map())
+  // Les noms des bureaux n'apparaissent qu'une fois zoomé : sinon ils se chevauchent sur un petit écran.
+  const [showNames, setShowNames] = useState(false)
+  const register = useCallback((id: string, element: HTMLDivElement | null) => {
+    if (element) labels.current.set(id, element)
+    else labels.current.delete(id)
+  }, [])
+
   return (
-    <Canvas
-      orthographic
-      flat
-      shadows
-      dpr={[1, 2]}
-      camera={{ position: CAMERA_OFFSET.toArray(), zoom: 40, near: 0.1, far: 100 }}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
-      style={{ touchAction: 'none' }}
-    >
-      <Scene {...props} />
-    </Canvas>
+    <div className="relative h-full w-full">
+      <Canvas
+        orthographic
+        flat
+        shadows
+        dpr={[1, 2]}
+        camera={{ position: CAMERA_OFFSET.toArray(), zoom: 40, near: 0.1, far: 100 }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        style={{ touchAction: 'none' }}
+      >
+        <Scene {...props} labels={labels} showNames={showNames} onShowNamesChange={setShowNames} />
+      </Canvas>
+
+      {/* Calque des étiquettes : du HTML ordinaire, qui laisse passer les gestes vers la 3D. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <DeskLabel id="pdg" name="Salle du PDG" icon="👔" color="#f2b632" showName={showNames} register={register} />
+        {props.offices.map((entry) => (
+          <OfficeLabel key={entry.office.id} entry={entry} showName={showNames} register={register} />
+        ))}
+      </div>
+    </div>
   )
 }

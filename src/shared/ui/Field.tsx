@@ -1,7 +1,8 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
 
-const INPUT_CLASS =
-  'w-full min-h-12 rounded-2xl bg-white px-4 text-base font-semibold ring-1 ring-black/10 outline-none focus:ring-2 focus:ring-brand-500'
+const INPUT_BASE = 'w-full rounded-2xl bg-white px-4 ring-1 ring-black/10 outline-none focus:ring-2 focus:ring-brand-500'
+const INPUT_CLASS = `${INPUT_BASE} min-h-12 text-base font-semibold`
+const INPUT_LARGE_CLASS = `${INPUT_BASE} min-h-16 text-3xl font-extrabold`
 
 /** Étiquette + contenu d'un champ de formulaire. */
 export function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -48,7 +49,7 @@ export function MoneyField({ label, value, onChange, currency, autoFocus, large 
     <Field label={label}>
       <div className="relative">
         <input
-          className={`${INPUT_CLASS} pr-16 ${large ? 'min-h-16 text-3xl font-extrabold' : ''}`}
+          className={`${large ? INPUT_LARGE_CLASS : INPUT_CLASS} pr-16`}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           inputMode="decimal"

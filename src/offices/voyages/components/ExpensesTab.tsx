@@ -116,13 +116,17 @@ export function ExpenseSheet({ bundle, expense, currency, myName, color, onClose
     expense?.splitBetween && expense.splitBetween.length > 0 ? expense.splitBetween : trip.participants,
   )
 
+  // Verrou : un double tap sur « Enregistrer » ne doit pas créer deux dépenses.
+  const [saving, setSaving] = useState(false)
+
   const amountCents = parseMoney(amount)
   const valid = amountCents !== null && amountCents > 0 && splitBetween.length > 0
   const options = trip.participants.map((participant) => ({ value: participant, label: participantName(participant, myName) }))
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!valid) return
+    if (!valid || saving) return
+    setSaving(true)
     await saveTripExpense(trip.id, { amountCents, note: note.trim(), date, paidBy, splitBetween }, expense?.id)
     onClose()
   }
@@ -153,7 +157,7 @@ export function ExpenseSheet({ bundle, expense, currency, myName, color, onClose
               Supprimer
             </Button>
           )}
-          <Button type="submit" className="flex-1" disabled={!valid} style={{ backgroundColor: color }}>
+          <Button type="submit" className="flex-1" disabled={!valid || saving} style={{ backgroundColor: color }}>
             Enregistrer
           </Button>
         </div>

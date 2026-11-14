@@ -1,4 +1,3 @@
-import { Html } from '@react-three/drei'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Mesh } from 'three'
@@ -7,20 +6,14 @@ import { Decor } from './Decor'
 
 export interface DeskProps {
   position: [number, number, number]
-  name: string
-  icon: string
   color: string
   decor?: DeskDecor
   state: OfficeState
-  badge: string | null
-  deskLabel: string | null
   /** Bureau pas encore construit (phase suivante). */
   underConstruction?: boolean
   /** Bureau du PDG : plus grand, au centre. */
   ceo?: boolean
   lampsOn: boolean
-  /** Afficher le nom à côté de l'icône (quand on a assez zoomé pour que ça tienne). */
-  showName: boolean
   onSelect: () => void
 }
 
@@ -52,8 +45,8 @@ function Beacon() {
   )
 }
 
-/** Un bureau de l'open space : meuble, écran, chaise, lampe, objet décoratif et étiquette. */
-export function Desk({ position, name, icon, color, decor, state, badge, deskLabel, underConstruction, ceo, lampsOn, showName, onSelect }: DeskProps) {
+/** Un bureau de l'open space : meuble, écran, chaise, lampe et objet décoratif. Son étiquette est dans Labels.tsx. */
+export function Desk({ position, color, decor, state, underConstruction, ceo, lampsOn, onSelect }: DeskProps) {
   const scale = ceo ? 1.25 : 1
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
@@ -146,30 +139,6 @@ export function Desk({ position, name, icon, color, decor, state, badge, deskLab
         <boxGeometry args={[2.9 * scale, 1.9, 2.7 * scale]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-
-      {/* Étiquette : icône, nom, compte à rebours ou montant, badge */}
-      <Html position={[0, ceo ? 2.5 : 2.15, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
-        <div className={`relative flex flex-col items-center whitespace-nowrap ${underConstruction ? 'opacity-80' : ''}`}>
-          <div
-            className={`flex h-8 items-center gap-1 rounded-full bg-white text-xs font-bold text-ink shadow-md ${showName ? 'px-2.5' : 'w-8 justify-center'}`}
-            aria-label={name}
-          >
-            <span className="text-base leading-none">{icon}</span>
-            {showName && name}
-            {showName && underConstruction && <span>🚧</span>}
-          </div>
-          {deskLabel && (
-            <div className="mt-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold text-white shadow" style={{ backgroundColor: color }}>
-              {deskLabel}
-            </div>
-          )}
-          {badge && (
-            <div className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-extrabold text-white shadow">
-              {badge}
-            </div>
-          )}
-        </div>
-      </Html>
     </group>
   )
 }

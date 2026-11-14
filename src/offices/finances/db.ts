@@ -11,6 +11,9 @@ import type { Account, Category, RecurringRule, SavingsGoal, Transaction, Transa
 
 // ---------- Lecture ----------
 
+/** Ordre d'affichage des comptes : le compte courant d'abord (c'est aussi le compte proposé par défaut). */
+const ACCOUNT_KIND_ORDER: Account['kind'][] = ['checking', 'savings', 'cash']
+
 export async function loadFinanceData(): Promise<FinanceData> {
   const [accounts, categories, budgets, rules, goals, transactions] = await Promise.all([
     db.accounts.toArray(),
@@ -31,7 +34,9 @@ export async function loadFinanceData(): Promise<FinanceData> {
   }
 
   return {
-    accounts: alive(accounts),
+    accounts: alive(accounts).sort(
+      (a, b) => ACCOUNT_KIND_ORDER.indexOf(a.kind) - ACCOUNT_KIND_ORDER.indexOf(b.kind) || a.createdAt.localeCompare(b.createdAt),
+    ),
     categories: alive(categories),
     budgets: alive(budgets),
     rules: alive(rules),

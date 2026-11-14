@@ -41,7 +41,7 @@ export function ItineraryTab({ bundle, color, onOpenSheet }: Props) {
             <div className="flex min-h-11 items-center justify-between gap-2 px-1">
               <h3 className="font-bold">
                 {dayNumber > 0 ? `Jour ${dayNumber}` : 'Hors voyage'}
-                <span className="ml-2 text-sm font-semibold capitalize text-muted">{formatDayLong(day)}</span>
+                <span className="ml-2 inline-block text-sm font-semibold text-muted first-letter:uppercase">{formatDayLong(day)}</span>
               </h3>
               <TextButton color={color} onClick={() => onOpenSheet({ date: day })}>
                 + Activité
